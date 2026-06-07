@@ -23,3 +23,47 @@ El backend actúa estrictamente como un API REST puro que distribuye datos en fo
 3. El Backend determina el recurso permitido según su rol y realiza la petición hacia Ghibli.
 
 ---
+
+## 🛠️ Guía de despliegue local
+
+Si deseas clonar y ejecutar este proyecto en tu entorno local, sigue los pasos detallados a continuación:
+
+### 1. Clonar el Repositorio
+En tu terminal, clona el proyecto y accede al directorio raíz:
+```
+git clone [https://github.com/tu-usuario/tu-repositorio.git](https://github.com/tu-usuario/tu-repositorio.git)
+cd tu-repositorio
+```
+
+### 2. Configurar el Archivo de Entorno (.env)
+Crea un archivo llamado .env en la raíz del proyecto (al mismo nivel que main.py).
+
+Debe llevar la siguiente estructura exacta:
+```
+# URL de conexión a tu base de datos de Neon.tech (PostgreSQL)
+DATABASE_URL=postgresql://neondb_owner:...
+
+# URL oficial de la API de Studio Ghibli
+GHIBLI_API_URL=[https://ghibliapi.vercel.app](https://ghibliapi.vercel.app)
+```
+
+### 3. Instalación de Dependencias
+Para instalar todas las librerías necesarias que requiere el backend para ejecutarse de manera correcta, ejecuta el siguiente comando en tu terminal:
+```
+pip install fastapi uvicorn sqlalchemy psycopg2-binary httpx python-dotenv bcrypt pydantic
+```
+
+Librerías instaladas:
+- fastapi y uvicorn: Framework web y servidor de producción ASGI.
+- sqlalchemy y psycopg2-binary: Para la conexión con la BD.
+- httpx: Cliente HTTP asíncrono para el Gateway Proxy de Studio Ghibli.
+- python-dotenv: Lector y mapeador del archivo .env.
+- bcrypt: Encriptación segura de contraseñas (Hashing).
+- pydantic: Validación de esquemas de datos.
+
+### 4. Comando de Ejecución
+Una vez que las dependencias estén instaladas y el archivo .env configurado, inicia el servidor de FastAPI con el siguiente comando:
+```
+uvicorn main:app --reload
+```
+El sistema estará disponible inmediatamente en tu navegador web a través de la dirección local: ```http://localhost:8000```
