@@ -29,7 +29,7 @@ El backend actúa estrictamente como un API REST puro que distribuye datos en fo
 Si deseas clonar y ejecutar este proyecto en tu entorno local, sigue los pasos detallados a continuación:
 
 ### 1. Clonar el Repositorio
-En tu terminal
+En tu terminal escribe el siguiente comando
 ```
 git clone https://github.com/Araxielfenix/ghibli-api.git
 cd tu-repositorio
