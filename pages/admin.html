@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banpay Challenge - Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'media' }</script>
+</head>
+
+<body class="bg-gray-100 text-gray-900 dark:bg-gray-950 dark:text-gray-100 min-h-screen transition-colors duration-300">
+
+    <nav class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 p-4 shadow-sm">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">banpay Admin</span>
+            <div class="flex items-center gap-5">
+                <a href="/dashboard" class="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium">Ver
+                    Dashboard</a>
+                <button onclick="logout()" class="text-sm text-red-500 hover:underline font-medium">Cerrar
+                    Sesión</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-6 space-y-6">
+        <div class="flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold">Gestión de Usuarios (API CRUD)</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Administración global de accesos y perfiles.</p>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-900 rounded-xl border dark:border-gray-800 overflow-hidden shadow-sm">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr
+                            class="bg-gray-50 dark:bg-gray-800 border-b dark:border-gray-700 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                            <th class="p-4">ID</th>
+                            <th class="p-4">Nombre</th>
+                            <th class="p-4">Email</th>
+                            <th class="p-4">Rol Asignado</th>
+                            <th class="p-4 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody" class="divide-y divide-gray-100 dark:divide-gray-800 text-sm">
+                        <tr>
+                            <td colspan="5" class="p-8 text-center text-gray-400">Cargando usuarios desde la base de
+                                datos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div id="editModal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6 shadow-xl border dark:border-gray-700">
+            <h3 class="text-xl font-bold mb-4">Editar Usuario</h3>
+            <form id="editForm" class="space-y-4">
+                <input type="hidden" id="editUserId">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Nombre Completo</label>
+                    <input type="text" id="editNombre" required
+                        class="w-full px-4 py-2 rounded-lg border dark:border-gray-600 bg-transparent focus:ring-2 focus:ring-blue-500 outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Correo Electrónico</label>
+                    <input type="email" id="editEmail" required
+                        class="w-full px-4 py-2 rounded-lg border dark:border-gray-600 bg-transparent focus:ring-2 focus:ring-blue-500 outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Rol de Acceso</label>
+                    <select id="editRol" required
+                        class="w-full px-4 py-2 rounded-lg border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                        <option value="admin">admin</option>
+                        <option value="films">films</option>
+                        <option value="people">people</option>
+                        <option value="locations">locations</option>
+                        <option value="species">species</option>
+                        <option value="vehicles">vehicles</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" id="btnCancelEdit"
+                        class="px-4 py-2 rounded-lg border dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition">Cancelar</button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition shadow-md">Guardar
+                        Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const adminId = sessionStorage.getItem('userId');
+        const userRole = sessionStorage.getItem('userRole');
+
+        if (!adminId || userRole !== 'admin') {
+            alert("Acceso denegado: No cuentas con privilegios administrativos activos.");
+            window.location.href = "/";
+        }
+
+        const tableBody = document.getElementById('usersTableBody');
+        const editModal = document.getElementById('editModal');
+        const editForm = document.getElementById('editForm');
+
+        const getHeaders = () => ({
+            'Content-Type': 'application/json',
+            'X-User-Id': adminId
+        });
+
+        async function cargarUsuarios() {
+            try {
+                const response = await fetch('/users', {
+                    method: 'GET',
+                    headers: getHeaders()
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Error al obtener usuarios');
+                }
+
+                const usuarios = await response.json();
+
+                if (usuarios.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">No hay usuarios registrados.</td></tr>`;
+                    return;
+                }
+
+                tableBody.innerHTML = usuarios.map(user => {
+                    const badgeClass = user.rol === 'admin'
+                        ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                        : 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
+
+                    return `
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition">
+                            <td class="p-4 font-mono text-xs text-gray-400">${user.id}</td>
+                            <td class="p-4 font-medium">${user.nombre}</td>
+                            <td class="p-4 text-gray-500 dark:text-gray-400">${user.email}</td>
+                            <td class="p-4"><span class="px-2 py-0.5 rounded text-xs font-medium ${badgeClass}">${user.rol}</span></td>
+                            <td class="p-4 text-right space-x-2 whitespace-nowrap">
+                                <button onclick="abrirModalEditar(${user.id}, '${user.nombre}', '${user.email}', '${user.rol}')" class="text-blue-600 dark:text-blue-400 font-medium hover:underline">Editar</button>
+                                <button onclick="eliminarUsuario(${user.id})" class="text-red-500 font-medium hover:underline">Eliminar</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-500 font-medium">Error: ${error.message}</td></tr>`;
+            }
+        }
+
+        async function eliminarUsuario(id) {
+            if (!confirm('¿Estás seguro de que deseas eliminar este usuario permanentemente?')) return;
+
+            try {
+                const response = await fetch(`/user/delete/${id}`, {
+                    method: 'DELETE',
+                    headers: getHeaders()
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'No se pudo eliminar el usuario');
+                }
+
+                alert('Usuario eliminado correctamente.');
+                cargarUsuarios();
+
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        function abrirModalEditar(id, nombre, email, rol) {
+            document.getElementById('editUserId').value = id;
+            document.getElementById('editNombre').value = nombre;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editRol').value = rol;
+            editModal.classList.remove('hidden');
+        }
+
+        document.getElementById('btnCancelEdit').addEventListener('click', () => {
+            editModal.classList.add('hidden');
+        });
+
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editUserId').value;
+
+            const nombre = encodeURIComponent(document.getElementById('editNombre').value);
+            const email = encodeURIComponent(document.getElementById('editEmail').value);
+            const rol = encodeURIComponent(document.getElementById('editRol').value);
+
+            try {
+                const response = await fetch(`/user/update/${id}?nombre=${nombre}&email=${email}&rol=${rol}`, {
+                    method: 'PUT',
+                    headers: getHeaders()
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Error al actualizar usuario');
+                }
+
+                alert('Usuario actualizado con éxito.');
+                editModal.classList.add('hidden');
+                cargarUsuarios();
+
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        });
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = "/";
+        }
+
+        cargarUsuarios();
+    </script>
+</body>
+
+</html>
