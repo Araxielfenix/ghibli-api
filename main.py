@@ -222,3 +222,7 @@ def delete_multiple_users(
         db.rollback()
         logging.error(f"Error crítico en bulk-delete: {str(e)}")
         raise HTTPException(status_code=500, detail="Error interno al procesar el borrado masivo.")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000)
