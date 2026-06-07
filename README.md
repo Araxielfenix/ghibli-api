@@ -44,7 +44,7 @@ Debe llevar la siguiente estructura exacta:
 DATABASE_URL=postgresql://neondb_owner:...
 
 # URL oficial de la API de Studio Ghibli
-GHIBLI_API_URL=[https://ghibliapi.vercel.app](https://ghibliapi.vercel.app)
+GHIBLI_API_URL="https://ghibliapi.vercel.app"
 ```
 
 ### 3. Instalación de Dependencias
