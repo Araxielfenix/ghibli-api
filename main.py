@@ -33,7 +33,6 @@ app = FastAPI(title="Ghibli API Challenge", lifespan=lifespan)
 app.title = "Ghibli API Challenge"
 
 Base.metadata.create_all(bind=engine)
-templates = Jinja2Templates(directory="pages")
 GHIBLI_API_URL = os.getenv("GHIBLI_API_URL")
 
 @app.get("/", tags=["Vistas"], response_class=HTMLResponse)
