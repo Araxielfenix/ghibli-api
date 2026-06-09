@@ -124,9 +124,38 @@ async def get_ghibli_data(
     resultados = []
     for item in datos_api:
         titulo = item.get("title") or item.get("name") or "Sin nombre"
-        descripcion = item.get("description") or f"Recurso de tipo {endpoint_final} sin descripción."
-        extra = item.get("original_title") or item.get("climate") or item.get("gender") or "N/A"
+        descripcion = ""
+        extra = ""
         url_imagen = item.get("image") or None
+
+        if endpoint_final == "films":
+            descripcion = item.get("description") or "Sin descripción disponible."
+            extra = f"Director: {item.get('director')} | Año: {item.get('release_date')}"
+            
+        elif endpoint_final == "vehicles":
+            descripcion = item.get("description") or "Sin descripción disponible."
+            extra = f"Clase: {item.get('vehicle_class')}"
+            
+        elif endpoint_final == "people":
+            edad = item.get("age") or "Desconocida"
+            ojos = item.get("eye_color") or "N/A"
+            cabello = item.get("hair_color") or "N/A"
+            descripcion = f"Personaje de Studio Ghibli. Edad: {edad}. Color de ojos: {ojos}. Cabello: {cabello}."
+            extra = f"Género: {item.get('gender') or 'N/A'}"
+            
+        elif endpoint_final == "locations":
+            clima = item.get("climate") or "Desconocido"
+            terreno = item.get("terrain") or "Desconocido"
+            agua = item.get("surface_water") or "N/A"
+            descripcion = f"Ubicación del universo Ghibli. Clima: {clima}. Terreno: {terreno}. Agua en superficie: {agua}%."
+            extra = f""
+            
+        elif endpoint_final == "species":
+            clasificacion = item.get("classification") or "Desconocida"
+            ojos = item.get("eye_colors") or "N/A"
+            cabello = item.get("hair_colors") or "N/A"
+            descripcion = f"Especie catalogada. Clasificación: {clasificacion}. Gama de ojos: {ojos}. Gama de cabello: {cabello}."
+            extra = f""
         
         resultados.append({
             "title_or_name": titulo,
