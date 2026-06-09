@@ -140,21 +140,21 @@ async def get_ghibli_data(
             edad = item.get("age") or "Desconocida"
             ojos = item.get("eye_color") or "N/A"
             cabello = item.get("hair_color") or "N/A"
-            descripcion = f"Personaje de Studio Ghibli. Edad: {edad}. Color de ojos: {ojos}. Cabello: {cabello}."
+            descripcion = f"Edad: {edad}. \nColor de ojos: {ojos}. \nCabello/pelaje: {cabello}."
             extra = f"Género: {item.get('gender') or 'N/A'}"
             
         elif endpoint_final == "locations":
             clima = item.get("climate") or "Desconocido"
             terreno = item.get("terrain") or "Desconocido"
             agua = item.get("surface_water") or "N/A"
-            descripcion = f"Ubicación del universo Ghibli. Clima: {clima}. Terreno: {terreno}. Agua en superficie: {agua}%."
+            descripcion = f"Clima: {clima}. \nTerreno: {terreno}. \nAgua en superficie: {agua}%."
             extra = f""
             
         elif endpoint_final == "species":
             clasificacion = item.get("classification") or "Desconocida"
             ojos = item.get("eye_colors") or "N/A"
             cabello = item.get("hair_colors") or "N/A"
-            descripcion = f"Especie catalogada. Clasificación: {clasificacion}. Gama de ojos: {ojos}. Gama de cabello: {cabello}."
+            descripcion = f"Especie catalogada como {clasificacion}. \nColor de ojos: {ojos}. \nCabello/pelaje: {cabello}."
             extra = f""
         
         resultados.append({
